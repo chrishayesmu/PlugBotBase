@@ -30,10 +30,22 @@ This section TBD.
 
 There are only three required pieces of configuration, and one optional. The optional configuration is the only one which is intended to be stored in NPM's config; everything else is stored in a JSON file. The configuration keys are:
 
-* `config_file`: This is the optional, NPM-only key. You can define this key in your package.json under config, or by using `npm config set ...`. This key tells PlugBotBase where to find your main JSON configuration file. You can supply an absolute or a relative path; if relative, it will be treated as being relative to the directory which contains your package.json file. If not set, the default is "config.json".
-* `bot_email`: This is the email address your bot uses to log in to plug.dj. Facebook logins are not supported.
-* `bot_password`: This is the password your bot uses to log in to plug.dj.
-* `room_name`: This is the name of the room you want your bot to connect to, though "room" is not entirely accurate. When you join a plug.dj room, the URL looks like `https://plug.dj/someroomname`. It is the `someroomname` which you should supply here. Room names can change, but this part of the URL never will.
+* `pbb_config_file`: This is the optional, NPM-only key. You can define this key in your package.json under config, or by using `npm config set ...`. This key tells PlugBotBase where to find your main JSON configuration file. You can supply an absolute or a relative path; if relative, it will be treated as being relative to the directory which contains your package.json file. If not set, the default is "config.json".
+* `pbb_bot_email`: This is the email address your bot uses to log in to plug.dj. Facebook logins are not supported.
+* `pbb_bot_password`: This is the password your bot uses to log in to plug.dj.
+* `pbb_room_name`: This is the name of the room you want your bot to connect to, though "room" is not entirely accurate. When you join a plug.dj room, the URL looks like `https://plug.dj/someroomname`. It is the `someroomname` which you should supply here. Room names can change, but this part of the URL never will.
+
+Everything except `pbb_config_file` should be defined in your JSON configuration file, as top-level elements:
+
+```
+{
+    "pbb_bot_email" : "mybotemail@gmail.com",
+    "pbb_bot_password" : "mypassword",
+    "pbb_room_name" : "someroomname"
+}
+```
+
+Note that these are not the only allowed configuration keys, they're just the only ones required by the framework. You can add any additional keys you want, and they'll be made available to your bot as part of the config object passed around. However, any config key starting with "pbb_" is reserved, and if you add keys which conflict with this, you may find your bot not working or behaving strangely in future versions.
 
 # FAQ
 
