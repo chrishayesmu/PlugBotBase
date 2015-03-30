@@ -1,3 +1,5 @@
+"use strict";
+
 var fs = require("fs");
 
 var Log = require("./log");
@@ -24,8 +26,9 @@ function create(basedir, defaults) {
 
     _loadBaseConfigFile(basedir, config);
     _validateConfig(config);
+    _freezeConfig(config);
 
-    LOG.info("Configuration set up successfully.");
+    LOG.info("Configuration set up successfully. The config object is now frozen and no changes can be made to it.");
     return config;
 }
 
@@ -82,6 +85,22 @@ function _copyNpmEnvironmentVariables(config) {
         if (key.indexOf(NPM_CONFIG_PREFIX) === 0) {
             var shortKey = key.replace(NPM_CONFIG_PREFIX, "");
             config[shortKey] = process.env[key];
+        }
+    }
+}
+
+/**
+ * Freezes the configuration object and makes it immutable. This is a deep
+ * method; all subobjects will also be immutable.
+ *
+ * @param {object} config - The current config object
+ */
+function _freezeConfig(config) {
+    Object.freeze(config);
+
+    for (var key in config) {
+        if (typeof config[key] === "object") {
+            _freezeConfig(config[key]);
         }
     }
 }

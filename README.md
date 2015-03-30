@@ -47,6 +47,8 @@ Everything except `pbb_config_file` should be defined in your JSON configuration
 
 Note that these are not the only allowed configuration keys, they're just the only ones required by the framework. You can add any additional keys you want, and they'll be made available to your bot as part of the config object passed around. However, any config key starting with "pbb_" is reserved, and if you add keys which conflict with this, you may find your bot not working or behaving strangely in future versions.
 
+One final note: **configuration is immutable**. There are other mechanisms for passing around global state, but once the bot has started up, you cannot change configuration programmatically.
+
 # FAQ
 
 ## My bot claims to connect to the room, but I'm seeing the error `[plugAPI]  Error while joining: notFound` and the bot never appears in the room
