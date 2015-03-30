@@ -51,6 +51,12 @@ One final note: **configuration is immutable**. There are other mechanisms for p
 
 # FAQ
 
-## My bot claims to connect to the room, but I'm seeing the error `[plugAPI]  Error while joining: notFound` and the bot never appears in the room
+#### My bot claims to connect to the room, but I'm seeing the error `[plugAPI]  Error while joining: notFound` and the bot never appears in the room
 
 This seems to be an issue with the underlying [PlugAPI](https://github.com/plugCubed/plugAPI) we are using; it reports successful connection to the room when this is not the case. This occurs if the room name you specified in your config is not valid. Keep in mind that if the room you're trying to join is private, you do not specify the room name directly. Instead, you should use the number which appears in the URL as the room name.
+
+#### I keep seeing messages saying "UNKNOWN MESSAGE FORMAT" in my logs.
+
+This is nothing to worry about. It occurs when the [PlugAPI](https://github.com/plugCubed/plugAPI) implementation we are using encounters an event message it's not familiar with. Such messages are still passed through to PlugBotBase and handled (or not) appropriately from there, so these warnings can be safely ignored.
+
+That said, if you see a warning for a message type you'd like to use in your own application that isn't supported, feel free to [raise an issue about it](https://github.com/chrishayesmu/PlugBotBase/issues) or submit a pull request.
