@@ -136,7 +136,8 @@ function Bot(credentials, globalObject) {
         var eventName = Event[eventKey];
         var translatorFunction = _eventTranslatorMap[eventName];
 
-        this.bot.on(eventName, _createEventDispatcher(eventName, translatorFunction, globalObject));
+        if (eventName !== Event.USER_JOIN)
+        this.bot.on(eventName, _createEventDispatcher(eventName, translatorFunction, globalObject).bind(this));
     }
 }
 
@@ -181,9 +182,16 @@ Bot.prototype.on = function(eventName, callback, /* optional */ context) {
  */
 function _createEventDispatcher(internalEventName, translator, globalObject) {
     return function(event) {
-        var handler = this.eventHandlers[internalEventName];
+        var handlers = this.eventHandlers[internalEventName];
         var internalObject = translator(event);
-        handler.callback.call(handler.context, internalObject, globalObject);
+
+        if (!internalObject) {
+            return;
+        }
+
+        for (var i = 0; i < handlers.length; i++) {
+            handlers[i].callback.call(handler.context, internalObject, globalObject);
+        }
     };
 }
 
@@ -207,6 +215,10 @@ function _translateDjObject(plugapiDj) {
 }
 
 function _translateAdvanceObject(event) {
+    if (!event.currentDJ || !event.media) {
+        return null;
+    }
+
     var obj = {
         incomingDJ: _translateDjObject(event.currentDJ), // the user who is DJing following this event
         media: {
@@ -236,11 +248,11 @@ function _translateAdvanceObject(event) {
                 title: event.lastPlay.media.title
             },
             score: {
-                grabs: event.lastPlay.media.score.grabs,
-                listeners: event.lastPlay.media.score.listeners,
-                mehs: event.lastPlay.media.score.negative,
-                woots: event.lastPlay.media.score.positive,
-                wasSkipped: event.lastPlay.media.score.skipped > 0
+                grabs: event.lastPlay.score.grabs,
+                listeners: event.lastPlay.score.listeners,
+                mehs: event.lastPlay.score.negative,
+                woots: event.lastPlay.score.positive,
+                wasSkipped: event.lastPlay.score.skipped > 0
             }
         };
     }
@@ -359,9 +371,9 @@ function _translateModMoveDjObject(event) {
     return {
         modUsername: event.m, // username of the mod who moved the DJ
         modUserID: event.mi, // ID of the mod who moved the DJ
-        movedUsername: event.u // username of the DJ who got moved
+        movedUsername: event.u, // username of the DJ who got moved
         newPosition: event.n, // new position in the wait list of the DJ
-        oldPosition: event.o, // old position in the wait list of the DJ
+        oldPosition: event.o // old position in the wait list of the DJ
     };
 }
 
