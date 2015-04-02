@@ -126,7 +126,7 @@ function Bot(credentials, globalObject) {
             LOG.info("Hooking into eventKey {}, eventName {}", eventKey, eventName);
             this.bot.on(eventName, (function(name) {
                 return function(event) {
-                    LOG.info("event {} is: {}", name, event);
+                    LOG.info("event '{}' has JSON payload: {}", name, event);
                 };
             })(eventName));
         }
@@ -204,6 +204,10 @@ function _repairTitle(author, title) {
 }
 
 function _translateDjObject(plugapiDj) {
+    if (!plugapiDj) {
+        return null;
+    }
+
     return {
         avatarID: plugapiDj.avatarID,
         joinDate: plugapiDj.joined,
@@ -238,7 +242,7 @@ function _translateAdvanceObject(event) {
 
     obj.waitlistedDJs = waitlist; // the current state of the waitlist
 
-    if (event.lastPlay) {
+    if (event.lastPlay && event.lastPlay.dj && event.lastPlay.media && event.lastPlay.score) {
         obj.previousPlay = { // the media which played before this one
             dj: _translateDjObject(event.lastPlay.dj),
             media: {
