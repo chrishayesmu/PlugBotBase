@@ -6,6 +6,7 @@
     "license" : "AML",
     "author" : "Chris Hayes",
     "bugs" : "https://github.com/chrishayesmu/PlugBotBase/issues",
+    "main" : "main.js",
     "repository" : {
         "type" : "git",
         "url" : "http://github.com/chrishayesmu/PlugBotBase"
