@@ -11,10 +11,6 @@
         "type" : "git",
         "url" : "http://github.com/chrishayesmu/PlugBotBase"
     },
-    "config" : {
-        "bot_email" : "unset",
-        "bot_password": "unset"
-    },
     "dependencies" : {
         "plugapi" : "3.1.2",
         "sqlite3" : "3.0.5"
