@@ -26,6 +26,12 @@ PlugBotBase is intended only as a starting point for building functional bots.
 
 This section TBD.
 
+# Getting started
+
+Running a bot on top of PlugBotBase is straightforward. You need to set up some required configuration (see below), then you're ready to add functionality to your bot.
+
+Adding functionality is a simple matter of having the right directory structure.
+
 # What configuration do I need?
 
 There are only three required pieces of configuration, and one optional. The optional configuration is the only one which is intended to be stored in NPM's config; everything else is stored in a JSON file. The configuration keys are:
@@ -33,7 +39,7 @@ There are only three required pieces of configuration, and one optional. The opt
 * `pbb_config_file`: This is the optional, NPM-only key. You can define this key in your package.json under config, or by using `npm config set ...`. This key tells PlugBotBase where to find your main JSON configuration file. You can supply an absolute or a relative path; if relative, it will be treated as being relative to the directory which contains your package.json file. If not set, the default is "config.json".
 * `pbb_bot_email`: This is the email address your bot uses to log in to plug.dj. Facebook logins are not supported.
 * `pbb_bot_password`: This is the password your bot uses to log in to plug.dj.
-* `pbb_room_name`: This is the name of the room you want your bot to connect to, though "room" is not entirely accurate. When you join a plug.dj room, the URL looks like `https://plug.dj/someroomname`. It is the `someroomname` which you should supply here. Room names can change, but this part of the URL never will.
+* `pbb_room_url`: This is the name of the room you want your bot to connect to, though "room" is not entirely accurate. When you join a plug.dj room, the URL looks like `https://plug.dj/someroomname`. It is the `someroomname` which you should supply here. Room names can change, but this part of the URL never will.
 
 Everything except `pbb_config_file` should be defined in your JSON configuration file, as top-level elements:
 
@@ -41,7 +47,7 @@ Everything except `pbb_config_file` should be defined in your JSON configuration
 {
     "pbb_bot_email" : "mybotemail@gmail.com",
     "pbb_bot_password" : "mypassword",
-    "pbb_room_name" : "someroomname"
+    "pbb_room_url" : "someroomname"
 }
 ```
 
@@ -51,7 +57,7 @@ One final note: **configuration is immutable**. There are other mechanisms for p
 
 # FAQ
 
-#### My bot claims to connect to the room, but I'm seeing the error `[plugAPI]  Error while joining: notFound` and the bot never appears in the room
+#### My bot claims to connect to the room, but I'm seeing the error `[plugAPI]  Error while joining: notFound` and the bot never appears in the room.
 
 This seems to be an issue with the underlying [PlugAPI](https://github.com/plugCubed/plugAPI) we are using; it reports successful connection to the room when this is not the case. This occurs if the room name you specified in your config is not valid. Keep in mind that if the room you're trying to join is private, you do not specify the room name directly. Instead, you should use the number which appears in the URL as the room name.
 
