@@ -26,7 +26,10 @@ function create(basedir, defaults) {
 
     _loadBaseConfigFile(basedir, config);
     _validateConfig(config);
-    _freezeConfig(config);
+
+    if (config.pbb_immutable_config) {
+        _freezeConfig(config);
+    }
 
     LOG.info("Configuration set up successfully. The config object is now frozen and no changes can be made to it.");
     return config;
