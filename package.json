@@ -1,18 +1,17 @@
 {
-    "name" : "PlugBotBase",
-    "description" : "",
-    "version" : "0.1.0",
-    "bugs" : "https://github.com/chrishayesmu/PlugBotBase/issues",
-    "license" : "AML",
-    "author" : "Chris Hayes",
-    "bugs" : "https://github.com/chrishayesmu/PlugBotBase/issues",
-    "main" : "main.js",
-    "repository" : {
-        "type" : "git",
-        "url" : "http://github.com/chrishayesmu/PlugBotBase"
-    },
-    "dependencies" : {
-        "plugapi" : "3.1.2",
-        "sqlite3" : "3.0.5"
-    }
+  "name": "PlugBotBase",
+  "description": "",
+  "version": "0.2.0",
+  "bugs": "https://github.com/chrishayesmu/PlugBotBase/issues",
+  "license": "AML",
+  "author": "Chris Hayes",
+  "main": "main.js",
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/chrishayesmu/PlugBotBase"
+  },
+  "dependencies": {
+    "plugapi": "3.1.2",
+    "sqlite3": "3.0.5"
+  }
 }
