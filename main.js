@@ -2,13 +2,11 @@ var Config = require("./src/config");
 var Log = require("./src/log");
 var Plug = require("./src/plug");
 
-function start() {
+function start(configDir) {
     var defaultConfig = require("./config/defaults.json");
-    var config = Config.create(__dirname, defaultConfig);
+    var config = Config.create(configDir, defaultConfig);
 
     var globalObject = { config: config };
-
-    LOG.info("__dirname: {}", __dirname);
 
     var bot = new Plug.Bot({
         email: config.pbb_bot_email,
