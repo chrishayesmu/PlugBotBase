@@ -44,7 +44,7 @@ function create(basedir, defaults) {
  * @param {object} config - The current config object
  */
 function _loadBaseConfigFile(basedir, config) {
-    var configFilePath = process.env.npm_package_config_pbb_config_file || "config.json";
+    var configFilePath = process.env.npm_package_config_pbb_config_file || "config/config.json";
 
     if (!configFilePath) {
         throw new Error("Could not locate the 'config_file' property in your NPM configuration.");

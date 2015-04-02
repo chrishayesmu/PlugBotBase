@@ -2,9 +2,9 @@ var Config = require("./src/config");
 var Log = require("./src/log");
 var Plug = require("./src/plug");
 
-function start(configDir) {
+function start(basedir) {
     var defaultConfig = require("./config/defaults.json");
-    var config = Config.create(configDir, defaultConfig);
+    var config = Config.create(basedir, defaultConfig);
 
     var globalObject = { config: config };
 
