@@ -1,6 +1,7 @@
 "use strict";
 
 var fs = require("fs");
+var path = require("path");
 
 var Log = require("./log");
 
@@ -50,15 +51,7 @@ function _loadBaseConfigFile(basedir, config) {
         throw new Error("Could not locate the 'config_file' property in your NPM configuration.");
     }
 
-    if (configFilePath[0] !== "/") {
-        // Make sure the basedir ends with a slash so concatenation works properly
-        if (basedir[basedir.length - 1] !== "/") {
-            basedir = basedir + "/";
-        }
-
-        configFilePath = basedir + configFilePath;
-    }
-
+    configFilePath = path.resolve(basedir, configFilePath);
     _copyConfigFromFile(configFilePath, config);
 }
 
