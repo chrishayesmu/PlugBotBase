@@ -136,7 +136,6 @@ function Bot(credentials, globalObject) {
         var eventName = Event[eventKey];
         var translatorFunction = _eventTranslatorMap[eventName];
 
-        if (eventName !== Event.USER_JOIN)
         this.bot.on(eventName, _createEventDispatcher(eventName, translatorFunction, globalObject).bind(this));
     }
 }
@@ -190,7 +189,7 @@ function _createEventDispatcher(internalEventName, translator, globalObject) {
         }
 
         for (var i = 0; i < handlers.length; i++) {
-            handlers[i].callback.call(handler.context, internalObject, globalObject);
+            handlers[i].callback.call(handlers[i].context, internalEventName, internalObject, globalObject);
         }
     };
 }
