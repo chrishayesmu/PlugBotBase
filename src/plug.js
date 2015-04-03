@@ -52,6 +52,7 @@ var BanDuration = {
 };
 
 var ChatType = {
+    COMMAND: "command",
     EMOTE : "emote",
     MESSAGE : "message"
 };
@@ -270,6 +271,7 @@ function _translateChatObject(event) {
         chatID: event.raw.cid, // an ID assigned by plug.dj uniquely identifying this message
         isMuted: event.muted, // whether the user chatting is muted
         message: event.message, // the chat message sent
+        type: _translateChatType(event), // what type of message was sent
         userID: event.from.id, // the ID of the user chatting
         username: event.from.username // the username of the user chatting
     };
@@ -282,8 +284,12 @@ function _translateChatDeleteObject(event) {
     };
 }
 
-function _translateChatType(type) {
-    switch (type) {
+function _translateChatType(event) {
+    if (event.message[0] === "!") {
+        return ChatType.COMMAND;
+    }
+
+    switch (event.type) {
         case "message":
             return ChatType.MESSAGE;
         case "emote":
@@ -305,15 +311,8 @@ function _translateCommandObject(event) {
         userRole: _translateRole(event.from.role)
     };
 
-    // For some reason, if no arguments are sent to the command, it sends 0 as an argument.
-    // Detect and bypass that case.
-    // TODO: ignore the built-in argument parsing altogether because it's awful.
-    if (event.message.indexOf(" ") < 0) {
-        obj.args = [];
-    }
-    else {
-        obj.args = event.args;
-    }
+    // Split message by spaces; splice to remove the command name from the arguments
+    obj.args = event.message.trim().split(/\s+/).splice(1);
 
     return obj;
 }
