@@ -22,10 +22,85 @@ function start(basedir) {
 
     globalObject.bot = bot;
 
+    var commands = _registerCommands(basedir, globalObject);
     var eventListeners = _registerEventListeners(basedir, globalObject);
+
+    // Hook our own event listener in to chat, for the command framework
+    bot.on(Plug.Event.CHAT_COMMAND, _createCommandHandler(commands));
 
     bot.connect(config.pbb_room_name);
     return bot;
+}
+
+/**
+ * Creates a handler for the CHAT_COMMAND event which will distribute
+ * chat commands to the appropriate registered handlers.
+ *
+ * @param {array} commands - All of the registered command handlers
+ * @returns {function} An event handler
+ */
+function _createCommandHandler(commands) {
+    return function(commandEvent, globalObject) {
+        var commandName = commandEvent.command;
+
+        if (!globalObject.config.pbb_commands_are_case_sensitive) {
+            commandName = commandName.toLowerCase();
+        }
+
+        for (var i = 0; i < commands.length; i++) {
+            var command = commands[i];
+
+            if (command.triggers.indexOf(commandName) >= 0) {
+                command.handler.call(command.context, commandEvent, globalObject);
+            }
+        }
+    };
+}
+
+/**
+ * Registers all of the eligible files from the commands
+ * directory as commands with the bot.
+ *
+ * @param {string} basedir - The base directory which holds the commands directory
+ * @param {object} bot - An instance of PlugBotBase.Bot
+ */
+function _registerCommands(basedir, globalObject) {
+    var commandsDir = path.resolve(basedir, "commands");
+
+    var files;
+    try {
+        files = _readDirRecursive(commandsDir);
+        LOG.info("Found the following potential command files: {}", files);
+    }
+    catch (e) {
+        LOG.error("Unable to register commands from the base directory '{}'. Error: {}", commandsDir, e);
+        return;
+    }
+
+    var commands = [];
+    for (var i = 0; i < files.length; i++) {
+        var filePath = files[i];
+        if (filePath.lastIndexOf(".js") !== filePath.length - 3) {
+            LOG.info("File {} doesn't appear to be a JS module. Ignoring.", filePath);
+            continue;
+        }
+
+        var module = require(filePath);
+
+        if (!module.triggers || !module.handler) {
+            LOG.warn("Found a module at {} but it doesn't appear to be a command handler. Ignoring.", filePath);
+            continue;
+        }
+
+        if (typeof module.init === "function") {
+            module.init(globalObject);
+        }
+
+        commands.push(module);
+        LOG.info("Registered command from file {}", filePath);
+    }
+
+    return commands;
 }
 
 /**
