@@ -1,4 +1,5 @@
 {
+    "pbb_commands_are_case_sensitive": false,
     "pbb_immutable_config": true,
     "pbb_log_all_events" : false
 }
