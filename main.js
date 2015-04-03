@@ -20,10 +20,9 @@ function start(basedir) {
         password: config.pbb_bot_password
     }, globalObject);
 
-    _registerEventListeners(basedir, bot);
-
-
     globalObject.bot = bot;
+
+    var eventListeners = _registerEventListeners(basedir, globalObject);
 
     bot.connect(config.pbb_room_name);
     return bot;
@@ -36,7 +35,8 @@ function start(basedir) {
  * @param {string} basedir - The base directory which holds the event_listeners directory
  * @param {object} bot - An instance of PlugBotBase.Bot
  */
-function _registerEventListeners(basedir, bot) {
+function _registerEventListeners(basedir, globalObject) {
+    var bot = globalObject.bot;
     var eventListenerDir = path.resolve(basedir, "event_listeners");
 
     var files;
@@ -49,6 +49,7 @@ function _registerEventListeners(basedir, bot) {
         return;
     }
 
+    var listeners = [];
     for (var i = 0; i < files.length; i++) {
         var filePath = files[i];
         if (filePath.lastIndexOf(".js") !== filePath.length - 3) {
@@ -63,13 +64,20 @@ function _registerEventListeners(basedir, bot) {
             continue;
         }
 
+        if (typeof module.init === "function") {
+            module.init(globalObject);
+        }
+
         for (var eventIndex = 0; eventIndex < module.events.length; eventIndex++) {
             var event = module.events[eventIndex];
             bot.on(event, module.handler, module.handlerContext);
         }
 
+        listeners.push(module);
         LOG.info("Registered event listener from file {}", filePath);
     }
+
+    return listeners;
 }
 
 /**
