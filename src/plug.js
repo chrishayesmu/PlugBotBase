@@ -188,8 +188,10 @@ function _createEventDispatcher(internalEventName, translator, globalObject) {
             return;
         }
 
+        internalObject.eventName = internalEventName;
+
         for (var i = 0; i < handlers.length; i++) {
-            handlers[i].callback.call(handlers[i].context, internalEventName, internalObject, globalObject);
+            handlers[i].callback.call(handlers[i].context, internalObject, globalObject);
         }
     };
 }
