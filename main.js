@@ -6,9 +6,16 @@ var path = require("path");
 var Config = require("./src/config");
 var Log = require("./src/log");
 var Plug = require("./src/plug");
+var Event = Plug.Event;
 
-var LOG = new Log("PlugBotBase");
+var LOG = new Log("PlugBotBaseMain");
 
+/**
+ * Starts up the bot, registering all commands and event listeners.
+ *
+ * @param {string} basedir - The base directory containing the commands/ and event_listeners/ subdirectories
+ * @returns {object} An instance of the PlugBotBase object
+ */
 function start(basedir) {
     var defaultConfig = require("./config/defaults.json");
     var config = Config.create(basedir, defaultConfig);
@@ -26,7 +33,7 @@ function start(basedir) {
     var eventListeners = _registerEventListeners(basedir, globalObject);
 
     // Hook our own event listener in to chat, for the command framework
-    bot.on(Plug.Event.CHAT_COMMAND, _createCommandHandler(commands));
+    bot.on(Event.CHAT_COMMAND, _createCommandHandler(commands));
 
     bot.connect(config.pbb_room_name);
     return bot;
@@ -134,18 +141,54 @@ function _registerEventListeners(basedir, globalObject) {
 
         var module = require(filePath);
 
-        if (!module.events || !module.handler) {
+        /* Check each event key and look for an export in one of two forms:
+         *
+         * 1) EVENT_KEY : some_function
+         * 2) EVENT_KEY : { handler: some_function, context: some_object }
+         *
+         * Context is optional even in the second form, but a function is always required.
+         */
+        var eventHandlerFound = false;
+        for (var eventKey in Event) {
+            var eventValue = Event[eventKey];
+            var eventHandler = null;
+            var handlerContext = null;
+            var error = null;
+
+            if (!module[eventValue]) {
+                continue;
+            }
+
+            if (typeof module[eventValue] === "function") {
+                eventHandler = module[eventValue];
+            }
+            else if (typeof module[eventValue] === "object") {
+                if (typeof module[eventValue].handler !== "function") {
+                    LOG.error("An error occurred while reading event listener from file {}", filePath);
+                    LOG.error("Event listener for event '{}' has an object type, but the 'handler' property does not refer to a function", eventKey);
+                    throw new Error("An error occurred while initializing event listeners. Check your logfile (or just stdout) for more details.");
+                }
+
+                eventHandler = module[eventValue].handler;
+                handlerContext = module[eventValue].context;
+            }
+            else {
+                LOG.warn("Found what looks like an event listener, but it's not an object or a function. Event: {}, from file: {}", eventKey, filePath);
+                continue;
+            }
+
+            eventHandlerFound = true;
+            bot.on(eventValue, eventHandler, handlerContext);
+        }
+
+        if (!eventHandlerFound) {
             LOG.warn("Found a module at {} but it doesn't appear to be an event handler. Ignoring.", filePath);
             continue;
         }
 
         if (typeof module.init === "function") {
+            LOG.info("Calling init for module at {}", filePath);
             module.init(globalObject);
-        }
-
-        for (var eventIndex = 0; eventIndex < module.events.length; eventIndex++) {
-            var event = module.events[eventIndex];
-            bot.on(event, module.handler, module.handlerContext);
         }
 
         listeners.push(module);

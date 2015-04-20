@@ -13,7 +13,7 @@ var PlugAPI = require('plugapi');
  * this class will need to be updated.
  */
 
-var LOG = new Log("bot.js");
+var LOG = new Log("PlugBotBaseBot.js");
 
 var Event = {
     ADVANCE: 'advance', // when the next song is up for play
