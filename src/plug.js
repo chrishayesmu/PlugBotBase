@@ -120,7 +120,7 @@ function Bot(credentials, globalObject) {
         this.eventHandlers[eventName] = [];
     }
 
-    if (globalObject.config.pbb_log_all_events) {
+    if (globalObject.config.PlugBotBase.logAllEvents) {
         LOG.info("Logging of all events is enabled (this includes events not supported by PlugBotBase). Setting up default event handlers.");
         for (var eventKey in PlugAPI.events) {
             var eventName = PlugAPI.events[eventKey];

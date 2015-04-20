@@ -23,8 +23,8 @@ function start(basedir) {
     var globalObject = { config: config };
 
     var bot = new Plug.Bot({
-        email: config.pbb_bot_email,
-        password: config.pbb_bot_password
+        email: config.PlugBotBase.botEmail,
+        password: config.PlugBotBase.botPassword
     }, globalObject);
 
     globalObject.bot = bot;
@@ -35,7 +35,7 @@ function start(basedir) {
     // Hook our own event listener in to chat, for the command framework
     bot.on(Event.CHAT_COMMAND, _createCommandHandler(commands));
 
-    bot.connect(config.pbb_room_name);
+    bot.connect(config.PlugBotBase.roomName);
     return bot;
 }
 
@@ -50,7 +50,7 @@ function _createCommandHandler(commands) {
     return function(commandEvent, globalObject) {
         var commandName = commandEvent.command;
 
-        if (!globalObject.config.pbb_commands_are_case_sensitive) {
+        if (!globalObject.config.PlugBotBase.areCommandsCaseSensitive) {
             commandName = commandName.toLowerCase();
         }
 

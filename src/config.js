@@ -8,14 +8,14 @@ var Log = require("./log");
 var LOG = new Log("config");
 
 var REQUIRED_CONFIG_VARIABLES = [
-    "pbb_bot_email",
-    "pbb_bot_password",
-    "pbb_room_name"
+    "botEmail",
+    "botPassword",
+    "roomName"
 ];
 
 /**
  * Initializes the application's configuration by reading from
- * the config file "botConfig.json".
+ * a config file defined in NPM configuration.
  *
  * @param {string} configFilePath - The path to a JSON file containing configuration
  * @param {object} defaults - An optional object containing default configuration.
@@ -28,12 +28,12 @@ function create(basedir, defaults) {
     _loadBaseConfigFile(basedir, config);
     _validateConfig(config);
 
-    if (config.pbb_immutable_config) {
+    if (config.PlugBotBase.isConfigImmutable) {
         _freezeConfig(config);
         LOG.info("Configuration set up successfully. The config object is now frozen and no changes can be made to it.");
     }
     else {
-        LOG.info("Configuration set up successfully. Config has not been frozen due to override of the pbb_immutable_config property.");
+        LOG.info("Configuration set up successfully. Config has not been frozen due to override of the PlugBotBase.isConfigImmutable property.");
     }
 
     return config;
@@ -49,10 +49,6 @@ function create(basedir, defaults) {
  */
 function _loadBaseConfigFile(basedir, config) {
     var configFilePath = process.env.npm_package_config_pbb_config_file || "config/config.json";
-
-    if (!configFilePath) {
-        throw new Error("Could not locate the 'config_file' property in your NPM configuration.");
-    }
 
     configFilePath = path.resolve(basedir, configFilePath);
     _copyConfigFromFile(configFilePath, config);
@@ -71,21 +67,6 @@ function _copyConfigFromFile(filePath, config) {
     _mergeConfig(config, fileConfig);
 
     LOG.info("Successfully read configuration file '{}'", filePath);
-}
-
-/**
- * Copies all environment variables beginning with NPM_CONFIG_PREFIX into
- * the config object.
- *
- * @params {object} config - The current config object
- */
-function _copyNpmEnvironmentVariables(config) {
-    for (var key in process.env) {
-        if (key.indexOf(NPM_CONFIG_PREFIX) === 0) {
-            var shortKey = key.replace(NPM_CONFIG_PREFIX, "");
-            config[shortKey] = process.env[key];
-        }
-    }
 }
 
 /**
@@ -123,27 +104,6 @@ function _mergeConfig(base, override) {
 }
 
 /**
- * Parses obj[key] as JSON and returns it. Throws an error if anything
- * fails, which is intended to make it easy to find the faulty key.
- *
- * @params {object} obj - An object to read from
- * @params {string} key - The key to read
- * @returns {mixed} The value of obj[key] interpreted as JSON
- */
-function _readKeyAsJson(obj, key) {
-    if (typeof obj[key] === "undefined") {
-        throw new Error("Attempted to read config key '" + key + "' but the value was undefined");
-    }
-
-    try {
-        return JSON.parse(obj[key]);
-    }
-    catch (e) {
-        throw new Error("Failed to parse value for config key '" + key + "'. It may not be valid JSON. (Original error: " + e.message) + ")";
-    }
-}
-
-/**
  * Performs validation to ensure the npm environment has been set up properly.
  * If anything is wrong, throws an error.
  *
@@ -152,9 +112,9 @@ function _readKeyAsJson(obj, key) {
 function _validateConfig(config) {
     for (var i = 0; i < REQUIRED_CONFIG_VARIABLES.length; i++) {
         var key = REQUIRED_CONFIG_VARIABLES[i];
-        var value = config[key];
+        var value = config.PlugBotBase[key];
         if (!value || value === "UNSET") {
-            throw new Error("No value has been set in config for key: " + key);
+            throw new Error("No value has been set in config for key: PlugBotBase." + key);
         }
     }
 }
