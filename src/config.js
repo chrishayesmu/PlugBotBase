@@ -30,9 +30,12 @@ function create(basedir, defaults) {
 
     if (config.pbb_immutable_config) {
         _freezeConfig(config);
+        LOG.info("Configuration set up successfully. The config object is now frozen and no changes can be made to it.");
+    }
+    else {
+        LOG.info("Configuration set up successfully. Config has not been frozen due to override of the pbb_immutable_config property.");
     }
 
-    LOG.info("Configuration set up successfully. The config object is now frozen and no changes can be made to it.");
     return config;
 }
 
