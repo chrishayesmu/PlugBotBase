@@ -228,7 +228,7 @@ function _translateAdvanceObject(event) {
         incomingDJ: _translateDjObject(event.currentDJ), // the user who is DJing following this event
         media: {
             author: event.media.author, // plug.dj's guess of who the author is
-            contentId: event.media.cid, // the Youtube or Soundcloud ID
+            contentID: event.media.cid, // the Youtube or Soundcloud ID
             durationInSeconds: event.media.duration, // how long the media is, in seconds
             fullTitle: _repairTitle(event.media.author, event.media.title), // our guess of what the song's original title was
             title: event.media.title // plug.dj's guess of what the title is
@@ -248,7 +248,7 @@ function _translateAdvanceObject(event) {
             dj: _translateDjObject(event.lastPlay.dj),
             media: {
                 author: event.lastPlay.media.author,
-                contentId: event.lastPlay.media.cid,
+                contentID: event.lastPlay.media.cid,
                 durationInSeconds: event.lastPlay.media.duration,
                 fullTitle: _repairTitle(event.lastPlay.media.author, event.lastPlay.media.title), // our guess of what the song's original title was
                 title: event.lastPlay.media.title
