@@ -17,7 +17,6 @@ var LOG = new Log("PlugBotBaseBot.js");
 
 var Event = {
     ADVANCE: 'advance', // when the next song is up for play
-    BAN: 'ban', // a mod bans a user from the room
     CHAT: 'chat', // someone sends a chat message
     CHAT_COMMAND: 'command', // someone sends a chat message prefixed with "!"
     CHAT_DELETE: 'chatDelete', // a mod deletes a chat message
@@ -251,6 +250,7 @@ function _translateAdvanceObject(event) {
                 author: event.lastPlay.media.author,
                 contentId: event.lastPlay.media.cid,
                 durationInSeconds: event.lastPlay.media.duration,
+                fullTitle: _repairTitle(event.lastPlay.media.author, event.lastPlay.media.title), // our guess of what the song's original title was
                 title: event.lastPlay.media.title
             },
             score: {
@@ -387,16 +387,16 @@ function _translateModMuteObject(event) {
         case 1:
             muteReason = MuteReason.VIOLATING_COMMUNITY_RULES;
             break;
-        case 1:
+        case 2:
             muteReason = MuteReason.VERBAL_ABUSE_OR_HARASSMENT;
             break;
-        case 1:
+        case 3:
             muteReason = MuteReason.SPAMMING_OR_TROLLING;
             break;
-        case 1:
+        case 4:
             muteReason = MuteReason.OFFENSIVE_LANGUAGE;
             break;
-        case 1:
+        case 5:
             muteReason = MuteReason.NEGATIVE_ATTITUDE;
             break;
         default:
@@ -554,4 +554,5 @@ exports.BanDuration = BanDuration;
 exports.Bot = Bot;
 exports.ChatType = ChatType;
 exports.Event = Event;
+exports.MuteReason = MuteReason;
 exports.UserRole = Role;

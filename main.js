@@ -235,5 +235,6 @@ exports.Bot = Plug.Bot;
 exports.ChatType = Plug.ChatType;
 exports.Event = Plug.Event;
 exports.Log = Log;
+exports.MuteReason = Plug.MuteReason;
 exports.UserRole = Plug.Role;
 exports.start = start;
