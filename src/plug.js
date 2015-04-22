@@ -252,12 +252,114 @@ Bot.prototype.forceSkip = function(callback) {
 }
 
 /**
+ * Makes the bot grab the currently playing song. This can fail if there is
+ * no song playing currently, or if the bot has no active playlist.
+ *
+ * @param {function} callback - Optional. If provided, will be called once the bot
+ *                              has grabbed, or once grabbing has failed. The callback
+ *                              is passed a Boolean parameter which is true if the bot grabbed.
+ */
+Bot.prototype.grabSong = function(callback) {
+    var wasGrabQueued = this.bot.grab(function() {
+        if (callback) {
+            callback(true);
+        }
+    });
+
+    if (!wasGrabQueued && callback) {
+        callback(false);
+    }
+}
+
+/**
+ * Attempts to place the bot in the wait list. This will fail if the bot is already
+ * in the wait list, the wait list is locked, or the bot has no playlists.
+ *
+ * @param {function} callback - Optional. If provided, will be called once the bot
+ *                              has joined the wait list, or once joining has failed.
+ *                              The callback is passed a Boolean parameter which is true
+ *                              if the bot joined the wait list.
+ */
+Bot.prototype.joinWaitList = function(callback) {
+    var wasJoinQueued = this.bot.joinBooth(function() {
+        if (callback) {
+            callback(true);
+        }
+    });
+
+    if (!wasJoinQueued && callback) {
+        callback(false);
+    }
+}
+
+/**
+ * Attempts to place the bot in the wait list. This will fail if the bot is not in
+ * the wait list to begin with.
+ *
+ * @param {function} callback - Optional. If provided, will be called once the bot
+ *                              has left the wait list, or once leaving has failed.
+ *                              The callback is passed a Boolean parameter which is true
+ *                              if the bot left the wait list.
+ */
+Bot.prototype.leaveWaitList = function(callback) {
+    var wasLeaveQueued = this.bot.leaveBooth(function() {
+        if (callback) {
+            callback(true);
+        }
+    });
+
+    if (!wasLeaveQueued && callback) {
+        callback(false);
+    }
+}
+
+/**
+ * Makes the bot meh the currently playing song. This can fail if there is
+ * no song playing currently.
+ *
+ * @param {function} callback - Optional. If provided, will be called once the bot
+ *                              has mehed, or once mehing has failed. The callback
+ *                              is passed a Boolean parameter which is true if the bot mehed.
+ */
+Bot.prototype.mehSong = function(callback) {
+    var wasMehQueued = this.bot.meh(function() {
+        if (callback) {
+            callback(true);
+        }
+    });
+
+    if (!wasMehQueued && callback) {
+        callback(false);
+    }
+}
+
+/**
  * Sends a chat message from the bot to the room.
  *
  * @param {String} message - The message to send from the bot.
  */
 Bot.prototype.sendChat = function(message) {
     this.bot.sendChat(message);
+}
+
+/**
+ * Makes the bot woot the currently playing song. This can fail if there is
+ * no song playing currently.
+ *
+ * @param {function} callback - Optional. If provided, will be called once the bot
+ *                              has wooted, or once wooting has failed. The callback
+ *                              is passed a Boolean parameter which is true if the bot wooted.
+ */
+Bot.prototype.wootSong = function(callback) {
+    var wasWootQueued = this.bot.woot(function() {
+        if (callback) {
+            callback(true);
+        }
+    });
+
+    if (!wasWootQueued && callback) {
+        callback(false);
+    }
 }
 
 /**
