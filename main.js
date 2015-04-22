@@ -231,6 +231,7 @@ function _readDirRecursive(basedir) {
 }
 
 exports.BanDuration = Plug.BanDuration;
+exports.BanReason = Plug.BanReason;
 exports.Bot = Plug.Bot;
 exports.ChatType = Plug.ChatType;
 exports.Event = Plug.Event;

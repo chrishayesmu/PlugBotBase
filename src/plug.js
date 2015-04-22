@@ -1,7 +1,8 @@
 "use strict";
 
-var Log = require('./log');
-var PlugAPI = require('plugapi');
+var Log = require("./log");
+var PlugAPI = require("plugapi");
+var Utils = require("./utils");
 
 /**
  * Provides the basic functionality of the bot: event subscription,
@@ -48,6 +49,14 @@ var BanDuration = {
     DAY: "1 day",
     HOUR: "1 hour",
     FOREVER: "Forever"
+};
+
+var BanReason = {
+    SPAMMING_OR_TROLLING: "Spamming or trolling",
+    VERBAL_ABUSE_OR_OFFENSIVE_LANGUAGE: "Verbal abuse or offensive language",
+    PLAYING_OFFENSIVE_MEDIA: "Playing offensive videos/songs",
+    REPEATEDLY_PLAYING_INAPPROPRIATE_GENRES: "Repeatedly playing inappropriate genre(s)",
+    NEGATIVE_ATTITUDE: "Negative attitude"
 };
 
 var ChatType = {
@@ -141,6 +150,74 @@ function Bot(credentials, globalObject) {
 }
 
 /**
+ * Attempts to ban a user from the room. If the bot doesn't have sufficient permissions
+ * (that is, it's not at least a bouncer, and a higher role than the target user) then
+ * TODO what? return value?
+ *
+ * @param {mixed} userID - String or number representing the userID of the user to be banned
+ * @param {String} banDuration - How long the ban should last, from the BanDuration enum
+ * @param {String} banReason - The reason the user is being banned, from the BanReason enum
+ * @param {function} callback - Optional; a function to be called once the ban is done (whether succeeded or failed)
+ */
+Bot.prototype.banUser = function(userID, banDuration, banReason, callback) {
+    Utils.checkHasValue(userID, "PlugBotBase.banUser called without a userID");
+    Utils.checkValueIsInObject(banDuration, BanDuration, "PlugBotBase.banUser called with an invalid BanDuration: " + banDuration);
+    Utils.checkValueIsInObject(banReason, BanReason, "PlugBotBase.banUser called with an invalid BanReason: " + banReason);
+
+    if (callback) {
+        Utils.checkHasType(callback, "function", "PlugBotBase.banUser called with a non-function value for 'callback' argument");
+    }
+
+    // Translate from our model to PlugAPI
+    var translatedBanDuration, translatedBanReason;
+
+    switch (banDuration) {
+        case BanDuration.HOUR:
+            translatedBanDuration = PlugAPI.BAN.HOUR;
+            break;
+        case BanDuration.DAY:
+            translatedBanDuration = PlugAPI.BAN.DAY;
+            break;
+        case BanDuration.FOREVER:
+            translatedBanDuration = PlugAPI.BAN.PERMA;
+            break;
+    }
+
+    switch (banReason) {
+        case BanReason.SPAMMING_OR_TROLLING:
+            translatedBanReason = PlugAPI.BAN_REASON.SPAMMING_TROLLING;
+            break;
+        case BanReason.VERBAL_ABUSE_OR_OFFENSIVE_LANGUAGE:
+            translatedBanReason = PlugAPI.BAN_REASON.VERBAL_ABUSE;
+            break;
+        case BanReason.PLAYING_OFFENSIVE_MEDIA:
+            translatedBanReason = PlugAPI.BAN_REASON.OFFENSIVE_MEDIA;
+            break;
+        case BanReason.REPEATEDLY_PLAYING_INAPPROPRIATE_GENRES:
+            translatedBanReason = PlugAPI.BAN_REASON.INAPPROPRIATE_GENRE;
+            break;
+        case BanReason.NEGATIVE_ATTITUDE:
+            translatedBanReason = PlugAPI.BAN_REASON.NEGATIVE_ATTITUDE;
+            break;
+    }
+
+    // Actually send the request
+    var wasRequestSent = this.bot.moderateBanUser(userID, translatedBanReason, translatedBanDuration, function() {
+        // TODO: this callback wasn't ever called in testing.
+        // TODO: check the user's permissions relative to the target and the room.
+        LOG.info("ban callback: {}", arguments);
+        if (callback) {
+            var args = [].slice.call(arguments);
+            callback.apply(null, args);
+        }
+    });
+
+    if (!wasRequestSent) {
+        // TODO call callback
+    }
+}
+
+/**
  * Attempts to connect the logged-in bot to a specific plug.dj room.
  *
  * @param {string} roomName - The name of the room to connect to
@@ -149,6 +226,38 @@ Bot.prototype.connect = function(roomName) {
     LOG.info("Attempting to connect to room {}", roomName);
     this.bot.connect(roomName);
     LOG.info("Connected to room successfully.");
+}
+
+/**
+ * Attempts to force skip the current song. The bot must have a position of bouncer
+ * or above in the room for this to work.
+ *
+ * @param {function} callback - Optional. If provided, will be called once the song
+ *                              is skipped or if skipping fails. The callback is passed
+ *                              a Boolean parameter which is true if a song was skipped.
+ *                              (Skipping can fail for lack of permissions or just because
+ *                              there is no current DJ.)
+ */
+Bot.prototype.forceSkip = function(callback) {
+    var wasSkipQueued = this.bot.moderateForceSkip(function() {
+        if (callback) {
+            callback(true);
+        }
+    });
+
+    // If queuing failed our callback will never trigger, so do it now
+    if (!wasSkipQueued && callback) {
+        callback(false);
+    }
+}
+
+/**
+ * Sends a chat message from the bot to the room.
+ *
+ * @param {String} message - The message to send from the bot.
+ */
+Bot.prototype.sendChat = function(message) {
+    this.bot.sendChat(message);
 }
 
 /**
@@ -551,6 +660,7 @@ function _translateRole(roleAsInt) {
 }
 
 exports.BanDuration = BanDuration;
+exports.BanReason = BanReason;
 exports.Bot = Bot;
 exports.ChatType = ChatType;
 exports.Event = Event;
