@@ -14,7 +14,7 @@ var Utils = require("./utils");
  * this class will need to be updated.
  */
 
-var LOG = new Log("PlugBotBaseBot.js");
+var LOG = new Log("PlugBotBase-Bot");
 
 var Event = {
     ADVANCE: 'advance', // when the next song is up for play
