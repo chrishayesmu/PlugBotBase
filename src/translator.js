@@ -6,10 +6,31 @@
  * other way.
  */
 
+var Log = require("./log");
 var Types = require("./types");
 
 function _repairTitle(author, title) {
     return (author ? author + " - " : "") + title;
+}
+
+/**
+ * Translates a date string from PlugAPI into a UNIX timestamp.
+ *
+ * @param {string} string - The date string to parse
+ * @returns {integer} The UNIX timestamp represented by the string
+ */
+function translateDateString(string) {
+    // Date strings from plug.dj are in a very specific format:
+    // yyyy-mm-dd HH:MM:SS.SSSSSS
+    if (string.length != 26) {
+        LOG.error("Received an invalid date string to translate: {}", string);
+        return;
+    }
+
+    // Add the time zone; plug appears to use UTC (though it could be GMT)
+    string = string + " UTC";
+
+    return Date.parse(string);
 }
 
 function translateMediaObject(media) {
@@ -47,7 +68,7 @@ function translateUserObject(plugapiDj) {
 
     return {
         avatarID: plugapiDj.avatarID,
-        joinDate: plugapiDj.joined,
+        joinDate: translateDateString(plugapiDj.joined),
         level: plugapiDj.level,
         role: translateRole(plugapiDj.role),
         userID: plugapiDj.id,
@@ -63,7 +84,7 @@ function translateAdvanceEvent(event) {
     var obj = {
         incomingDJ: translateUserObject(event.currentDJ), // the user who is DJing following this event
         media: translateMediaObject(event.media),
-        startDate: event.startTime // when the media begins playing
+        startDate: translateDateString(event.startTime) // when the media begins playing
     };
 
     var waitlist = [];
@@ -373,6 +394,7 @@ module.exports = {
     translateChatEvent: translateChatEvent,
     translateCommandEvent: translateCommandEvent,
     translateChatDeleteEvent: translateChatDeleteEvent,
+    translateDateString: translateDateString,
     translateDjListCycleEvent: translateDjListCycleEvent,
     translateDjListUpdateEvent: translateDjListUpdateEvent,
     translateDjListLockedEvent: translateDjListLockedEvent,
