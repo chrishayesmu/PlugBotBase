@@ -73,7 +73,7 @@ function populateUsers(globalObject, callback) {
             var play = {
                 media: Translator.translateMediaObject(playHistory[i].media),
                 score: Translator.translateScoreObject(playHistory[i].score),
-                startDate: playHistory[i].timestamp,
+                startDate: Translator.translateDateString(playHistory[i].timestamp),
                 user: {
                     userID: playHistory[i].user.id,
                     username: playHistory[i].user.username
@@ -86,31 +86,35 @@ function populateUsers(globalObject, callback) {
         // Add the currently playing song to the DJ history, since we won't get
         // any other chance to do so. (At this point the initial ADVANCE event
         // from joining the room has almost certainly already fired and been missed.)
-        var currentPlay = {
-            media: currentSong,
-            startDate: null, // TODO: we can calculate this based on time elapsed
-            user: currentDj,
-            votes: {
-                grabs: [], // list of user IDs which fall into this category
-                mehs: [],
-                woots: []
-            }
-        };
+        if (currentSong && currentDj) {
+            var elapsedTime = globalObject.bot.bot.getTimeElapsed();
+            var startDate = Date.now() - elapsedTime * 1000;
+            var currentPlay = {
+                media: currentSong,
+                startDate: startDate,
+                user: currentDj,
+                votes: {
+                    grabs: [], // list of user IDs which fall into this category
+                    mehs: [],
+                    woots: []
+                }
+            };
 
-        for (i = 0; i < users.length; i++) {
-            var user = users[i];
-            if (user.grab) {
-                currentPlay.votes.grabs.push(user.id);
+            for (i = 0; i < users.length; i++) {
+                var user = users[i];
+                if (user.grab) {
+                    currentPlay.votes.grabs.push(user.id);
+                }
+                if (user.vote === 1) {
+                    currentPlay.votes.woots.push(user.id);
+                }
+                else if (user.vote === -1) {
+                    currentPlay.votes.mehs.push(user.id);
+                }
             }
-            if (user.vote === 1) {
-                currentPlay.votes.woots.push(user.id);
-            }
-            else if (user.vote === -1) {
-                currentPlay.votes.mehs.push(user.id);
-            }
+
+            globalObject.roomState.playHistory.unshift(currentPlay);
         }
-
-        globalObject.roomState.playHistory.unshift(currentPlay);
 
         callback();
     });
