@@ -35,29 +35,41 @@ function init(globalObject, onComplete) {
     bot.on(Types.Event.CHAT, onChat);
     bot.on(Types.Event.CHAT_DELETE, onChatDelete);
     bot.on(Types.Event.DJ_LIST_UPDATE, onDjListUpdate);
+    bot.on(Types.Event.GRAB, onGrab);
     bot.on(Types.Event.MODERATE_REMOVE_DJ, onModerateRemoveDj);
     bot.on(Types.Event.USER_LEAVE, onUserLeave);
     bot.on(Types.Event.USER_JOIN, onUserJoin);
+    bot.on(Types.Event.VOTE, onVote);
 
-    populateUsers(globalObject);
-
-    onComplete();
+    populateUsers(globalObject, onComplete);
 }
 
-function populateUsers(globalObject) {
-    // Drill into the undocumented 'bot within a bot' which is PlugAPI for some info
-    var users = globalObject.bot.bot.getUsers();
-
-    for (var i = 0; i < users.length; i++) {
-        var user = Translator.translateUserObject(users[i]);
-        globalObject.roomState.usersInRoom.push(user);
-    }
-
-    var waitList = globalObject.bot.bot.getWaitList();
-    LOG.info("waitList: {}", waitList);
-
+function populateUsers(globalObject, callback) {
+    // Drill into the undocumented 'bot within a bot' which is PlugAPI for some info.
+    // getHistory() is the only async API we use, so we start off with that in order
+    // to make sure all of our data comes from approximately the same point in time.
     globalObject.bot.bot.getHistory(function(playHistory) {
-        for (var i = 0; i < playHistory.length; i++) {
+        var currentSong = Translator.translateMediaObject(globalObject.bot.bot.getMedia());
+        var currentDj = Translator.translateUserObject(globalObject.bot.bot.getDJ());
+        var users = globalObject.bot.bot.getUsers();
+        var waitList = globalObject.bot.bot.getWaitList();
+
+        for (var i = 0; i < users.length; i++) {
+            var user = Translator.translateUserObject(users[i]);
+            globalObject.roomState.usersInRoom.push(user);
+        }
+
+        // Figure out who's in the wait list. The current DJ should be included but
+        // isn't, so adjust for that too
+        globalObject.roomState.usersInWaitList.push(currentDj);
+
+        for (i = 0; i < waitList.length; i++) {
+            var translatedDj = Translator.translateUserObject(waitList[i]);
+            globalObject.roomState.usersInWaitList.push(translatedDj);
+        }
+
+        // Initialize DJ history (up to 50 songs)
+        for (i = 0; i < playHistory.length; i++) {
             var play = {
                 media: Translator.translateMediaObject(playHistory[i].media),
                 score: Translator.translateScoreObject(playHistory[i].score),
@@ -65,22 +77,42 @@ function populateUsers(globalObject) {
                 user: {
                     userID: playHistory[i].user.id,
                     username: playHistory[i].user.username
-                }
+                },
+                votes: null // we can't get voting info from the history
             };
             globalObject.roomState.playHistory.push(play);
         }
 
-        var currentSong = globalObject.bot.bot.getMedia();
-        var currentDj = globalObject.bot.bot.getDJ();
-
-        // TODO figure out what to do with the score
+        // Add the currently playing song to the DJ history, since we won't get
+        // any other chance to do so. (At this point the initial ADVANCE event
+        // from joining the room has almost certainly already fired and been missed.)
         var currentPlay = {
-            media: Translator.translateMediaObject(currentSong),
+            media: currentSong,
             startDate: null, // TODO: we can calculate this based on time elapsed
-            user: Translator.translateUserObject(currentDj)
+            user: currentDj,
+            votes: {
+                grabs: [], // list of user IDs which fall into this category
+                mehs: [],
+                woots: []
+            }
         };
 
+        for (i = 0; i < users.length; i++) {
+            var user = users[i];
+            if (user.grab) {
+                currentPlay.votes.grabs.push(user.id);
+            }
+            if (user.vote === 1) {
+                currentPlay.votes.woots.push(user.id);
+            }
+            else if (user.vote === -1) {
+                currentPlay.votes.mehs.push(user.id);
+            }
+        }
+
         globalObject.roomState.playHistory.unshift(currentPlay);
+
+        callback();
     });
 
 }
@@ -90,16 +122,21 @@ function populateUsers(globalObject) {
 // =============================
 
 function onAdvance(event, globalObject) {
-    // Move the current DJ to the end of the wait list
     globalObject.roomState.usersInWaitList = event.waitlistedDJs;
 
     // Add the new song to the song history
     var play = {
         media: event.media,
         startDate: event.startDate,
-        user: event.incomingDJ
+        user: event.incomingDJ,
+        votes: {
+            grabs: [],
+            mehs: [],
+            woots: []
+        }
     };
-    globalObject.roomState.playHistory.unshift(event.media);
+
+    globalObject.roomState.playHistory.unshift(play);
 }
 
 function onChat(event, globalObject) {
@@ -155,6 +192,14 @@ function onDjListUpdate(event, globalObject) {
     globalObject.roomState.usersInWaitList = event;
 }
 
+function onGrab(event, globalObject) {
+    var currentSong = globalObject.roomState.playHistory[0];
+
+    if (currentSong.votes.grabs.indexOf(event.userID) < 0) {
+        currentSong.votes.grabs.push(event.userID);
+    }
+}
+
 function onModerateRemoveDj(event, globalObject) {
     // Since we only get a username for this event, do a custom search
     for (var i = 0; i < globalObject.state.usersInWaitList.length; i++) {
@@ -181,6 +226,29 @@ function onUserJoin(event, globalObject) {
     }
 
     globalObject.roomState.usersInRoom.push(event);
+}
+
+function onVote(event, globalObject) {
+    var currentSong = globalObject.roomState.playHistory[0];
+    var userID = event.userID;
+
+    // Since users can change votes, we need to make
+    // sure they're only in one list at a time
+
+    if (currentSong.votes.woots.indexOf(userID) >= 0) {
+        currentSong.votes.woots.splice(currentSong.votes.woots.indexOf(userID), 1);
+    }
+
+    if (currentSong.votes.mehs.indexOf(userID) >= 0) {
+        currentSong.votes.mehs.splice(currentSong.votes.mehs.indexOf(userID), 1);
+    }
+
+    if (event.vote === 1) {
+        currentSong.votes.woots.push(userID);
+    }
+    else if (event.vote === -1) {
+        currentSong.votes.mehs.push(userID);
+    }
 }
 
 function _findUserIndex(users, userID) {

@@ -161,7 +161,6 @@ Bot.prototype.banUser = function(userID, banDuration, banReason, callback) {
 Bot.prototype.connect = function(roomName) {
     LOG.info("Attempting to connect to room {}", roomName);
     this.bot.connect(roomName);
-    LOG.info("Connected to room successfully.");
 }
 
 /**
