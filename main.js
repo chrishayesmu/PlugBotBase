@@ -7,7 +7,9 @@ var Config = require("./src/config");
 var Log = require("./src/log");
 var Plug = require("./src/plug");
 var StateTracker = require("./src/state_tracker");
-var Event = Plug.Event;
+var Types = require("./src/types");
+
+var Event = Types.Event;
 
 var LOG = new Log("PlugBotBaseMain");
 
@@ -238,12 +240,12 @@ function _readDirRecursive(basedir) {
     return allFiles;
 }
 
-exports.BanDuration = Plug.BanDuration;
-exports.BanReason = Plug.BanReason;
+exports.BanDuration = Types.BanDuration;
+exports.BanReason = Types.BanReason;
 exports.Bot = Plug.Bot;
-exports.ChatType = Plug.ChatType;
-exports.Event = Plug.Event;
+exports.ChatType = Types.ChatType;
+exports.Event = Types.Event;
 exports.Log = Log;
-exports.MuteReason = Plug.MuteReason;
-exports.UserRole = Plug.Role;
+exports.MuteReason = Types.MuteReason;
+exports.UserRole = Types.UserRole;
 exports.start = start;

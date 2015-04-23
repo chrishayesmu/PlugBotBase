@@ -1,6 +1,7 @@
 var Log = require("./log");
 var PlugBotBase = require("./plug");
-var Event = PlugBotBase.Event;
+var Translator = require("./translator");
+var Types = require("./types");
 
 var LOG = new Log("PlugBotBaseStateTracker");
 
@@ -37,13 +38,13 @@ function init(globalObject, onComplete) {
         usersInWaitList: []
     };
 
-    bot.on(Event.ADVANCE, onAdvance);
-    bot.on(Event.CHAT, onChat);
-    bot.on(Event.CHAT_DELETE, onChatDelete);
-    bot.on(Event.DJ_LIST_UPDATE, onDjListUpdate);
-    bot.on(Event.MODERATE_REMOVE_DJ, onModerateRemoveDj);
-    bot.on(Event.USER_LEAVE, onUserLeave);
-    bot.on(Event.USER_JOIN, onUserJoin);
+    bot.on(Types.Event.ADVANCE, onAdvance);
+    bot.on(Types.Event.CHAT, onChat);
+    bot.on(Types.Event.CHAT_DELETE, onChatDelete);
+    bot.on(Types.Event.DJ_LIST_UPDATE, onDjListUpdate);
+    bot.on(Types.Event.MODERATE_REMOVE_DJ, onModerateRemoveDj);
+    bot.on(Types.Event.USER_LEAVE, onUserLeave);
+    bot.on(Types.Event.USER_JOIN, onUserJoin);
 
     onComplete();
 }
