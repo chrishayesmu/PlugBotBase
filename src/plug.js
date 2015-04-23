@@ -274,6 +274,7 @@ Bot.prototype.mehSong = function(callback) {
  * @param {String} message - The message to send from the bot.
  */
 Bot.prototype.sendChat = function(message) {
+    message = Utils.replaceStringPlaceholders(message, arguments);
     this.bot.sendChat(message);
 }
 

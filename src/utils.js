@@ -143,6 +143,26 @@ function findValueInObject(value, object) {
 }
 
 /**
+ * Replaces each instance of "{}" in the input string with a string value corresponding
+ * to the arguments passed in to the function.
+ *
+ * @param {string} string - The string to replace in
+ * @returns {string} A string with placeholders replaced
+ */
+function replaceStringPlaceholders(string, args) {
+    for (var i = 1; i < args.length; i++) {
+        var value = args[i];
+        if (typeof value === "object") {
+            value = JSON.stringify(value);
+        }
+
+        string = string.replace("{}", value);
+    }
+
+    return string;
+}
+
+/**
  * Checks that the keys which are in the first object are also in the second object,
  * and that they have the same value in both places.
  *
@@ -173,5 +193,6 @@ module.exports = {
     checkNotEmpty: checkNotEmpty,
     checkValueIsInObject: checkValueIsInObject,
     deepEquals: deepEquals,
-    findValueInObject: findValueInObject
+    findValueInObject: findValueInObject,
+    replaceStringPlaceholders: replaceStringPlaceholders
 };

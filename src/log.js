@@ -1,3 +1,5 @@
+var Utils = require("./utils");
+
 function Log(loggerName) {
     this._loggerName = loggerName;
 }
@@ -17,14 +19,8 @@ function _generateLogFunc(level) {
         if (typeof message === "object") {
             message = JSON.stringify(message);
         }
-
-        for (var i = 1; i < arguments.length; i++) {
-            var value = arguments[i];
-            if (typeof value === "object") {
-                value = JSON.stringify(value);
-            }
-
-            message = message.replace("{}", value);
+        else {
+            message = Utils.replaceStringPlaceholders(message, arguments);
         }
 
         this._log(level, message);
