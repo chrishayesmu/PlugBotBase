@@ -41,6 +41,14 @@ function init(globalObject, onComplete) {
     bot.on(Types.Event.USER_JOIN, onUserJoin);
     bot.on(Types.Event.VOTE, onVote);
 
+    globalObject.roomState.findUserInRoomById = function(userID) {
+        return _findUser(globalObject.roomState.usersInRoom, userID);
+    };
+
+    globalObject.roomState.findUserInWaitListById = function(userID) {
+        return _findUser(globalObject.roomState.usersInWaitList, userID);
+    };
+
     populateUsers(globalObject, onComplete);
 }
 
