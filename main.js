@@ -6,6 +6,7 @@ var path = require("path");
 var Config = require("./src/config");
 var Log = require("./src/log");
 var Plug = require("./src/plug");
+var StateTracker = require("./src/state_tracker");
 var Event = Plug.Event;
 
 var LOG = new Log("PlugBotBaseMain");
@@ -14,9 +15,10 @@ var LOG = new Log("PlugBotBaseMain");
  * Starts up the bot, registering all commands and event listeners.
  *
  * @param {string} basedir - The base directory containing the commands/ and event_listeners/ subdirectories
- * @returns {object} An instance of the PlugBotBase object
+ * @param {function} connectionCompleteCallback - A function to be called once the bot has connected to the room
+ * @returns {object} The global object which contains a reference to the bot
  */
-function start(basedir) {
+function start(basedir, connectionCompleteCallback) {
     var defaultConfig = require("./config/defaults.json");
     var config = Config.create(basedir, defaultConfig);
 
@@ -28,15 +30,21 @@ function start(basedir) {
     }, globalObject);
 
     globalObject.bot = bot;
+    StateTracker.init(globalObject, function() {
+        var commands = _registerCommands(basedir, globalObject);
+        var eventListeners = _registerEventListeners(basedir, globalObject);
 
-    var commands = _registerCommands(basedir, globalObject);
-    var eventListeners = _registerEventListeners(basedir, globalObject);
+        // Hook our own event listener in to chat, for the command framework
+        bot.on(Event.CHAT_COMMAND, _createCommandHandler(commands));
 
-    // Hook our own event listener in to chat, for the command framework
-    bot.on(Event.CHAT_COMMAND, _createCommandHandler(commands));
+        bot.connect(config.PlugBotBase.roomName);
 
-    bot.connect(config.PlugBotBase.roomName);
-    return bot;
+        if (connectionCompleteCallback) {
+            connectionCompleteCallback(globalObject);
+        }
+    });
+
+    return globalObject;
 }
 
 /**
