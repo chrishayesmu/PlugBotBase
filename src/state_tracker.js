@@ -6,13 +6,6 @@ var Types = require("./types");
 var LOG = new Log("PlugBotBaseStateTracker");
 
 /**
- *
- * @param {object} bot - The bot which holds event listeners
- */
-function connectEventListeners(bot) {
-}
-
-/**
  * Initializes the state tracker by doing a couple of things:
  *
  * 1) Connects all of the event listeners we need. This function should be called
@@ -46,17 +39,66 @@ function init(globalObject, onComplete) {
     bot.on(Types.Event.USER_LEAVE, onUserLeave);
     bot.on(Types.Event.USER_JOIN, onUserJoin);
 
+    populateUsers(globalObject);
+
     onComplete();
 }
 
-function onAdvance(event, globalObject) {
-    // Move the current DJ to the end of the wait list
-    var outgoingDJ = globalObject.roomState.usersInWaitList.shift();
-    if (outgoingDJ) {
-        globalObject.roomState.usersInWaitList.push(outgoingDJ);
+function populateUsers(globalObject) {
+    // Drill into the undocumented 'bot within a bot' which is PlugAPI for some info
+    var users = globalObject.bot.bot.getUsers();
+
+    for (var i = 0; i < users.length; i++) {
+        var user = Translator.translateUserObject(users[i]);
+        globalObject.roomState.usersInRoom.push(user);
     }
 
+    var waitList = globalObject.bot.bot.getWaitList();
+    LOG.info("waitList: {}", waitList);
+
+    globalObject.bot.bot.getHistory(function(playHistory) {
+        for (var i = 0; i < playHistory.length; i++) {
+            var play = {
+                media: Translator.translateMediaObject(playHistory[i].media),
+                score: Translator.translateScoreObject(playHistory[i].score),
+                startDate: playHistory[i].timestamp,
+                user: {
+                    userID: playHistory[i].user.id,
+                    username: playHistory[i].user.username
+                }
+            };
+            globalObject.roomState.playHistory.push(play);
+        }
+
+        var currentSong = globalObject.bot.bot.getMedia();
+        var currentDj = globalObject.bot.bot.getDJ();
+
+        // TODO figure out what to do with the score
+        var currentPlay = {
+            media: Translator.translateMediaObject(currentSong),
+            startDate: null, // TODO: we can calculate this based on time elapsed
+            user: Translator.translateUserObject(currentDj)
+        };
+
+        globalObject.roomState.playHistory.unshift(currentPlay);
+    });
+
+}
+
+// =============================
+// Event handlers
+// =============================
+
+function onAdvance(event, globalObject) {
+    // Move the current DJ to the end of the wait list
+    globalObject.roomState.usersInWaitList = event.waitlistedDJs;
+
     // Add the new song to the song history
+    var play = {
+        media: event.media,
+        startDate: event.startDate,
+        user: event.incomingDJ
+    };
     globalObject.roomState.playHistory.unshift(event.media);
 }
 

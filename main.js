@@ -17,7 +17,7 @@ var LOG = new Log("PlugBotBaseMain");
  * Starts up the bot, registering all commands and event listeners.
  *
  * @param {string} basedir - The base directory containing the commands/ and event_listeners/ subdirectories
- * @param {function} connectionCompleteCallback - A function to be called once the bot has connected to the room
+ * @param {function} connectionCompleteCallback - A function to be called once the bot has connected to the room and is ready to use
  * @returns {object} The global object which contains a reference to the bot
  */
 function start(basedir, connectionCompleteCallback) {
@@ -32,20 +32,26 @@ function start(basedir, connectionCompleteCallback) {
     }, globalObject);
 
     globalObject.bot = bot;
-    StateTracker.init(globalObject, function() {
-        var commands = _registerCommands(basedir, globalObject);
-        var eventListeners = _registerEventListeners(basedir, globalObject);
+    bot.connect(config.PlugBotBase.roomName);
 
-        // Hook our own event listener in to chat, for the command framework
-        bot.on(Event.CHAT_COMMAND, _createCommandHandler(commands));
+    LOG.info("Connect request sent. Waiting 5 seconds for the connection to be established.");
+    var callback = function() {
+        StateTracker.init(globalObject, function() {
+            // Connect before registering anything, because StateTracker depends on being connected
+            var commands = _registerCommands(basedir, globalObject);
+            var eventListeners = _registerEventListeners(basedir, globalObject);
 
-        bot.connect(config.PlugBotBase.roomName);
+            // Hook our own event listener in to chat, for the command framework
+            bot.on(Event.CHAT_COMMAND, _createCommandHandler(commands));
 
-        if (connectionCompleteCallback) {
-            connectionCompleteCallback(globalObject);
-        }
-    });
 
+            if (connectionCompleteCallback) {
+                connectionCompleteCallback(globalObject);
+            }
+        });
+    };
+
+    setTimeout(callback, 5000);
     return globalObject;
 }
 
