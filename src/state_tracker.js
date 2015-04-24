@@ -49,6 +49,18 @@ function init(globalObject, onComplete) {
         return _findUser(globalObject.roomState.usersInWaitList, userID);
     };
 
+    globalObject.roomState.findPlaysForContentId = function(contentID) {
+        var plays = [];
+        for (var i = 0; i < globalObject.roomState.playHistory.length; i++) {
+            var play = globalObject.roomState.playHistory[i];
+            if (play.media.contentID === contentID) {
+                plays.push(play);
+            }
+        }
+
+        return plays;
+    }
+
     populateUsers(globalObject, onComplete);
 }
 
