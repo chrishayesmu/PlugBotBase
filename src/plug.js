@@ -269,6 +269,19 @@ Bot.prototype.mehSong = function(callback) {
 }
 
 /**
+ * Attempts to change a DJ's position in the wait list.
+ */
+Bot.prototype.moveDjInWaitList = function(userID, newPosition, callback) {
+    var wasRequestQueued = this.bot.moderateMoveDJ(userID, newPosition, function() {
+        LOG.info("moveDjInWaitList callback: {}", arguments);
+    });
+
+    if (!wasRequestQueued && callback) {
+        callback(false);
+    }
+}
+
+/**
  * Sends a chat message from the bot to the room.
  *
  * @param {String} message - The message to send from the bot.
