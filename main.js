@@ -74,6 +74,15 @@ function _createCommandHandler(commands) {
             var command = commands[i];
 
             if (command.triggers.indexOf(commandName) >= 0) {
+                if (command.minimumRole && commandEvent.userRole.level < command.minimumRole.level) {
+                    // user doesn't have sufficient permissions; notify the command module if possible
+                    if (command.insufficientPermissionsHandler) {
+                        command.insufficientPermissionsHandler.call(command.context, commandEvent, globalObject);
+                    }
+
+                    continue;
+                }
+
                 command.handler.call(command.context, commandEvent, globalObject);
             }
         }
