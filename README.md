@@ -1,6 +1,6 @@
 # PlugBotBase
 
-Provides a configuration-driven base for building [plug.dj](https://plug.dj) bots. ***This project is not yet ready for consumption!***
+Provides a configuration-driven base for building [plug.dj](https://plug.dj) bots which run in [Node.js](https://nodejs.org/). ***This project is not yet ready for consumption!***
 
 # What's the point?
 
@@ -24,36 +24,13 @@ PlugBotBase is intended only as a starting point for building functional bots.
 
 # Who's using PlugBotBase
 
-This section TBD.
+Right now I'm using PlugBotBase to power my own bot, called [EmancipatorBot](https://github.com/chrishayesmu/EmancipatorBot). If you're using PlugBotBase in your own project, let me know!
 
 # Getting started
 
-Running a bot on top of PlugBotBase is straightforward. You need to set up some required configuration (see below), then you're ready to add functionality to your bot.
+Running a bot on top of PlugBotBase is straightforward. You need to set up some required configuration (see below), then you're ready to add functionality to your bot, which is a simple matter of having files in the right directory structure.
 
-Adding functionality is a simple matter of having the right directory structure.
-
-# What configuration do I need?
-
-There are only three required pieces of configuration, and one optional. The optional configuration is the only one which is intended to be stored in NPM's config; everything else is stored in a JSON file. The configuration keys are:
-
-* `pbb_config_file`: This is the optional, NPM-only key. You can define this key in your package.json under config, or by using `npm config set ...`. This key tells PlugBotBase where to find your main JSON configuration file. You can supply an absolute or a relative path; if relative, it will be treated as being relative to the directory which contains your package.json file. If not set, the default is "config.json".
-* `pbb_bot_email`: This is the email address your bot uses to log in to plug.dj. Facebook logins are not supported.
-* `pbb_bot_password`: This is the password your bot uses to log in to plug.dj.
-* `pbb_room_url`: This is the name of the room you want your bot to connect to, though "room" is not entirely accurate. When you join a plug.dj room, the URL looks like `https://plug.dj/someroomname`. It is the `someroomname` which you should supply here. Room names can change, but this part of the URL never will.
-
-Everything except `pbb_config_file` should be defined in your JSON configuration file, as top-level elements:
-
-```
-{
-    "pbb_bot_email" : "mybotemail@gmail.com",
-    "pbb_bot_password" : "mypassword",
-    "pbb_room_url" : "someroomname"
-}
-```
-
-Note that these are not the only allowed configuration keys, they're just the only ones required by the framework. You can add any additional keys you want, and they'll be made available to your bot as part of the config object passed around. However, any config key starting with "pbb_" is reserved, and if you add keys which conflict with this, you may find your bot not working or behaving strangely in future versions.
-
-One final note: **configuration is immutable**. There are other mechanisms for passing around global state, but once the bot has started up, you cannot change configuration programmatically.
+You can follow the [Getting Started guide](https://github.com/chrishayesmu/PlugBotBase/wiki/Getting-Started).
 
 # FAQ
 
