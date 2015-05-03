@@ -36,7 +36,7 @@ You can follow the [Getting Started guide](https://github.com/chrishayesmu/PlugB
 
 #### My bot claims to connect to the room, but I'm seeing the error `[plugAPI]  Error while joining: notFound` and the bot never appears in the room.
 
-This seems to be an issue with the underlying [PlugAPI](https://github.com/plugCubed/plugAPI) we are using; it reports successful connection to the room when this is not the case. This occurs if the room name you specified in your config is not valid. Keep in mind that if the room you're trying to join is private, you do not specify the room name directly. Instead, you should use the number which appears in the URL as the room name.
+This seems to be an issue with the underlying [PlugAPI](https://github.com/plugCubed/plugAPI) we are using; it reports successful connection to the room when this is not the case. This occurs if the room name you specified in your config is not valid. Keep in mind that you don't specify the room name (which can be changed) in your configuration; you specify the unique portion of the room's URL.
 
 #### I keep seeing messages saying "UNKNOWN MESSAGE FORMAT" in my logs.
 
