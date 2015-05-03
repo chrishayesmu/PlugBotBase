@@ -45,7 +45,6 @@ function start(basedir, connectionCompleteCallback) {
             // Hook our own event listener in to chat, for the command framework
             bot.on(Event.CHAT_COMMAND, _createCommandHandler(commands));
 
-
             if (connectionCompleteCallback) {
                 connectionCompleteCallback(globalObject);
             }

@@ -4,6 +4,9 @@
  * File exposing some utility functions for use within PlugBotBase.
  */
 
+var fs = require("fs");
+var path = require("path");
+
 /**
  * Checks that the value provided has the expected type. If it does not,
  * throws an error with the message provided. If the message contains "{{actual}}",
