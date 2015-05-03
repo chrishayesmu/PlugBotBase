@@ -4,6 +4,7 @@ var fs = require("fs");
 var path = require("path");
 
 var Log = require("./log");
+var Utils = require("./utils");
 
 var LOG = new Log("config");
 
@@ -17,7 +18,7 @@ var REQUIRED_CONFIG_VARIABLES = [
  * Initializes the application's configuration by reading from
  * a config file defined in NPM configuration.
  *
- * @param {string} configFilePath - The path to a JSON file containing configuration
+ * @param {string} basedir - The base directory of the bot, containing a "config" subdirectory
  * @param {object} defaults - An optional object containing default configuration.
  * @returns {object} An object representing configuration
  */
@@ -25,7 +26,7 @@ function create(basedir, defaults) {
     LOG.info("Initializing application configuration");
     var config = defaults || {};
 
-    _loadBaseConfigFile(basedir, config);
+    _loadConfigurationFiles(basedir, config);
     _validateConfig(config);
 
     if (config.PlugBotBase.isConfigImmutable) {
@@ -40,18 +41,35 @@ function create(basedir, defaults) {
 }
 
 /**
- * Copies configuration from the main configuration file. The path to that
- * file must be specified in the NPM config variable "config_file". It will be
- * treated as a relative or absolute path based on the path itself.
+ * Loads configuration out of the config/ subdirectory. All .json files found
+ * under config/ or any of its subdirectories will be loaded into configuration.
  *
- * @param {string} baseDir - The directory to consider as the base path for any relative files
+ * @param {string} baseDir - The directory to find config/ under
  * @param {object} config - The current config object
  */
-function _loadBaseConfigFile(basedir, config) {
-    var configFilePath = process.env.npm_package_config_pbb_config_file || "config/config.json";
+function _loadConfigurationFiles(basedir, config) {
+    var configDirPath = path.resolve(basedir, "config");
 
-    configFilePath = path.resolve(basedir, configFilePath);
-    _copyConfigFromFile(configFilePath, config);
+    var files;
+    try {
+        files = Utils.getAllFilePathsUnderDirectory(configDirPath);
+        LOG.info("Found the following potential config files: {}", files);
+    }
+    catch (e) {
+        throw e;
+        throw new Error("Unable to load configuration from the base directory '" + configDirPath + "'",  e);
+    }
+
+    for (var i = 0; i < files.length; i++) {
+        var filePath = files[i];
+
+        if (filePath.lastIndexOf(".json") !== filePath.length - 5) {
+            LOG.info("File {} doesn't appear to be a JSON file (therefore not configuration). Ignoring.", filePath);
+            continue;
+        }
+
+        _copyConfigFromFile(filePath, config);
+    }
 }
 
 /**
