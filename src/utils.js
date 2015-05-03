@@ -143,6 +143,40 @@ function findValueInObject(value, object) {
 }
 
 /**
+ * Retrieves all of the file paths which can be found in the base directory
+ * provided. The method recurses through all subdirectories within the base
+ * directory. Only file paths are returned; directories, symbolic links, etc,
+ * are not included.
+ *
+ * @param {string} directory - The path (relative or absolute) to the base directory to look in
+ * @returns {array} An array of strings which are all of the files found under the base directory
+ */
+function getAllFilePathsUnderDirectory(directory) {
+    // TODO: make this run in parallel, async
+
+    var filesInBaseDir = fs.readdirSync(directory);
+    var allFiles = [];
+
+    if (!filesInBaseDir) {
+        return allFiles;
+    }
+
+    for (var i = 0; i < filesInBaseDir.length; i++) {
+        var filePath = path.resolve(directory, filesInBaseDir[i]);
+        var fileStats = fs.statSync(filePath);
+
+        if (fileStats.isDirectory()) {
+            allFiles = allFiles.concat(getAllFilePathsUnderDirectory(filePath));
+        }
+        else if (fileStats.isFile()) {
+            allFiles.push(filePath);
+        }
+    }
+
+    return allFiles;
+}
+
+/**
  * Replaces each instance of "{}" in the input string with a string value corresponding
  * to the arguments passed in to the function.
  *
@@ -194,5 +228,6 @@ module.exports = {
     checkValueIsInObject: checkValueIsInObject,
     deepEquals: deepEquals,
     findValueInObject: findValueInObject,
+    getAllFilePathsUnderDirectory: getAllFilePathsUnderDirectory,
     replaceStringPlaceholders: replaceStringPlaceholders
 };

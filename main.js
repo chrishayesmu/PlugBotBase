@@ -8,6 +8,7 @@ var Log = require("./src/log");
 var Plug = require("./src/plug");
 var StateTracker = require("./src/state_tracker");
 var Types = require("./src/types");
+var Utils = require("./src/utils");
 
 var Event = Types.Event;
 
@@ -101,7 +102,7 @@ function _registerCommands(basedir, globalObject) {
 
     var files;
     try {
-        files = _readDirRecursive(commandsDir);
+        files = Utils.getAllFilePathsUnderDirectory(commandsDir);
         LOG.info("Found the following potential command files: {}", files);
     }
     catch (e) {
@@ -148,7 +149,7 @@ function _registerEventListeners(basedir, globalObject) {
 
     var files;
     try {
-        files = _readDirRecursive(eventListenerDir);
+        files = Utils.getAllFilePathsUnderDirectory(eventListenerDir);
         LOG.info("Found the following potential event listener files: {}", files);
     }
     catch (e) {
@@ -221,38 +222,6 @@ function _registerEventListeners(basedir, globalObject) {
     }
 
     return listeners;
-}
-
-/**
- * Finds all of the files from a directory and all of its subdirectories,
- * and turns them into absolute paths.
- *
- * TODO: Make all this parallel for quicker startup of big bots
- *
- * @param {string} basedir - The base directory to start reading from
- * @returns {array} An array of all the files under the base directory and any subdirectories
- */
-function _readDirRecursive(basedir) {
-    var filesInBaseDir = fs.readdirSync(basedir);
-    var allFiles = [];
-
-    if (!filesInBaseDir) {
-        return allFiles;
-    }
-
-    for (var i = 0; i < filesInBaseDir.length; i++) {
-        var filePath = path.resolve(basedir, filesInBaseDir[i]);
-        var fileStats = fs.statSync(filePath);
-
-        if (fileStats.isDirectory()) {
-            allFiles = allFiles.concat(_readDirRecursive(filePath));
-        }
-        else if (fileStats.isFile()) {
-            allFiles.push(filePath);
-        }
-    }
-
-    return allFiles;
 }
 
 exports.BanDuration = Types.BanDuration;
