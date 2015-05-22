@@ -11,6 +11,6 @@
     "url": "http://github.com/chrishayesmu/PlugBotBase"
   },
   "dependencies": {
-    "plugapi": "3.1.2"
+    "plugapi": "3.2.1"
   }
 }
