@@ -282,11 +282,28 @@ Bot.prototype.moveDjInWaitList = function(userID, newPosition, callback) {
 }
 
 /**
- * Sends a chat message from the bot to the room.
+ * Sends a chat message from the bot to the room. The message string can
+ * contain sets of curly braces ("{}") as placeholders. Any such placeholders
+ * will be replaced by their respective arguments to the function, if any. Any
+ * non-primitive arguments will be serialized via JSON.stringify and sent in
+ * that form.
+ *
+ * If the output message needs to contain "{}" in its literal form for some reason,
+ * then pass the string "{}" as the corresponding argument. If there are more sets
+ * of curly braces than there are extra arguments to the function, any leftover
+ * sets of curly braces will be passed through in their literal form.
+ *
+ * @example <caption>Example of string substitution with primitives.</caption>
+ * // outputs "User coolguy has received 5 woots"
+ * bot.sendChat("User {} has received {} woots", "coolguy", 5);
+ *
+ * @example <caption>Example of string substitution with an object.</caption>
+ * // outputs "The event is {"type":"vote"}
+ * bot.sendChat("The event is {}", { type: "vote" });
  *
  * @param {String} message - The message to send from the bot.
  */
-Bot.prototype.sendChat = function(message) {
+Bot.prototype.sendChat = function(message /*, varargs */) {
     message = Utils.replaceStringPlaceholders(message, arguments);
     this.bot.sendChat(message);
 }
