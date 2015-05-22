@@ -9,6 +9,8 @@
 var Log = require("./log");
 var Types = require("./types");
 
+var LOG = new Log("Translator");
+
 function _repairTitle(author, title) {
     return (author ? author + " - " : "") + title;
 }
