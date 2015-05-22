@@ -270,10 +270,18 @@ Bot.prototype.mehSong = function(callback) {
 
 /**
  * Attempts to change a DJ's position in the wait list.
+ *
+ * @param {mixed} userID - String or number representing the userID of the user to be moved
+ * @param {integer} newPosition - The new position the user should occupy in the wait list
+ * @param {function} callback - Optional. If provided, will be called once the user has been moved,
+ *                              or once moving has failed. Moving can fail if the user is not found,
+ *                              is not in the wait list, or already occupies this position in the
+ *                              wait list. The callback is passed a Boolean parameter which is
+ *                              true if the user was moved.
  */
 Bot.prototype.moveDjInWaitList = function(userID, newPosition, callback) {
     var wasRequestQueued = this.bot.moderateMoveDJ(userID, newPosition, function() {
-        LOG.info("moveDjInWaitList callback: {}", arguments);
+        callback(true);
     });
 
     if (!wasRequestQueued && callback) {
