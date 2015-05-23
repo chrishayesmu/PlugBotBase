@@ -226,10 +226,10 @@ function onGrab(event, globalObject) {
 
 function onModerateRemoveDj(event, globalObject) {
     // Since we only get a username for this event, do a custom search
-    for (var i = 0; i < globalObject.state.usersInWaitList.length; i++) {
-        var user = globalObject.state.usersInWaitList[i];
+    for (var i = 0; i < globalObject.roomState.usersInWaitList.length; i++) {
+        var user = globalObject.roomState.usersInWaitList[i];
         if (user.username === event.username) {
-            globalObject.state.usersInWaitList.splice(i, 1);
+            globalObject.roomState.usersInWaitList.splice(i, 1);
             break;
         }
     }
