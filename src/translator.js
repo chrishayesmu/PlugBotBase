@@ -85,8 +85,9 @@ function translateAdvanceEvent(event) {
 
     var obj = {
         incomingDJ: translateUserObject(event.currentDJ), // the user who is DJing following this event
+        localStartDate: Date.now(), // when the media began playing according to this machine
         media: translateMediaObject(event.media),
-        startDate: translateDateString(event.startTime) // when the media begins playing
+        startDate: translateDateString(event.startTime) // when the media began playing according to plug.dj
     };
 
     var waitlist = [];
