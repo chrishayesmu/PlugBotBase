@@ -193,6 +193,8 @@ function onChat(event, globalObject) {
 function onChatDelete(event, globalObject) {
     var deletedMessageIndex = -1;
     var currentTime = Date.now();
+    var deletedMessages = [];
+
     for (var i = 0; i < globalObject.roomState.chatHistory.length; i++) {
         var chatObj = globalObject.roomState.chatHistory[i];
 
@@ -200,6 +202,7 @@ function onChatDelete(event, globalObject) {
             chatObj.isDeleted = true;
             chatObj.deletedByUserID = event.modUserID;
             chatObj.deletionTime = currentTime;
+            deletedMessages.push(chatObj);
             deletedMessageIndex = i;
             break;
         }
@@ -216,12 +219,17 @@ function onChatDelete(event, globalObject) {
                 chatObj.isDeleted = true;
                 chatObj.deletedByUserID = event.modUserID;
                 chatObj.deletionTime = currentTime;
+                deletedMessages.push(chatObj);
             }
             else {
                 break;
             }
         }
     }
+
+    // Cheat a bit and attach a new object to the event
+    // TODO: move this to the right place
+    event.deletedMessages = deletedMessages;
 }
 
 function onDjListUpdate(event, globalObject) {
