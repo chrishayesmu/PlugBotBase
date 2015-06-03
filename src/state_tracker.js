@@ -146,6 +146,8 @@ function populateUsers(globalObject, callback) {
 // =============================
 
 function onAdvance(event, globalObject) {
+    var maxPlayHistoryLength = globalObject.config.PlugBotBase.numberOfPlayedSongsToStore;
+
     globalObject.roomState.usersInWaitList = event.waitlistedDJs;
 
     // Add the new song to the song history
@@ -161,9 +163,15 @@ function onAdvance(event, globalObject) {
     };
 
     globalObject.roomState.playHistory.unshift(play);
+
+    if (globalObject.roomState.playHistory.length > maxPlayHistoryLength) {
+        globalObject.roomState.playHistory.length = maxPlayHistoryLength;
+    }
 }
 
 function onChat(event, globalObject) {
+    var maxChatHistoryLength = globalObject.config.PlugBotBase.numberOfChatEventsToStore;
+
     var chatObj = {
         chatID: event.chatID,
         message: event.message,
@@ -176,6 +184,10 @@ function onChat(event, globalObject) {
 
     // Add this to the front of the chat history
     globalObject.roomState.chatHistory.unshift(chatObj);
+
+    if (globalObject.roomState.chatHistory.length > maxChatHistoryLength) {
+        globalObject.roomState.chatHistory.length = maxChatHistoryLength;
+    }
 }
 
 function onChatDelete(event, globalObject) {

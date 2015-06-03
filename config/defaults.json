@@ -2,6 +2,8 @@
     "PlugBotBase": {
         "areCommandsCaseSensitive" : false,
         "isConfigImmutable" : true,
-        "logAllEvents" : false
+        "logAllEvents" : false,
+        "numberOfChatEventsToStore": 5000,
+        "numberOfPlayedSongsToStore": 250
     }
 }
