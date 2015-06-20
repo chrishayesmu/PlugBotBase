@@ -19,9 +19,15 @@ function _repairTitle(author, title) {
  * Translates a date string from PlugAPI into a UNIX timestamp.
  *
  * @param {string} string - The date string to parse
- * @returns {integer} The UNIX timestamp represented by the string
+ * @returns {integer} The UNIX timestamp represented by the string,
+ *                    or the current time if string is null/empty
  */
 function translateDateString(string) {
+    if (!string) {
+        LOG.warn("Received an empty date string");
+        return Date.now();
+    }
+
     // Date strings from plug.dj are in a very specific format:
     // yyyy-mm-dd HH:MM:SS.SSSSSS
     if (string.length != 26) {
