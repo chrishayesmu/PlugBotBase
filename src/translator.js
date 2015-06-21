@@ -120,8 +120,8 @@ function translateChatEvent(event) {
         isMuted: event.muted, // whether the user chatting is muted
         message: event.message, // the chat message sent
         type: translateChatType(event), // what type of message was sent
-        userID: event.from.id, // the ID of the user chatting
-        username: event.from.username // the username of the user chatting
+        userID: event.from ? event.from.id : event.raw.uid, // the ID of the user chatting
+        username: event.from ? event.from.username : event.raw.un // the username of the user chatting
     };
 }
 
