@@ -1,3 +1,7 @@
+# Deprecated
+
+Since [plug.dj](https://plug.dj) has shut down, this project is no longer relevant or maintained.
+
 # PlugBotBase
 
 Provides a configuration-driven base for building [plug.dj](https://plug.dj) bots which run in [Node.js](https://nodejs.org/). ***This project is not yet ready for consumption!***
